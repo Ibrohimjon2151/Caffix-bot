@@ -1,7 +1,6 @@
 package com.example.caffix.bot;
 
 import com.example.caffix.DBconfig.entity.Basket;
-import com.example.caffix.DBconfig.entity.OrderProduct;
 import com.example.caffix.DBconfig.entity.Product;
 import com.example.caffix.DBconfig.entity.User;
 import com.example.caffix.DBconfig.repository.*;
@@ -10,31 +9,19 @@ import com.example.caffix.bot.MethodsService.BasketService;
 import com.example.caffix.bot.MethodsService.LavashServices;
 import com.example.caffix.bot.MethodsService.PizzaServices;
 import com.example.caffix.bot.MethodsService.SendServices;
-import com.example.caffix.bot.constants.ConstantaNumbers;
 import com.example.caffix.bot.constants.MenuConstants;
 import com.example.caffix.bot.constants.BotState;
 import com.example.caffix.bot.constants.ProductNames;
 import com.example.caffix.bot.interfaces.BasketConstants;
 import com.example.caffix.bot.interfaces.LavashConstants;
+import com.example.caffix.bot.interfaces.PizzaConstants;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
-import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
-import org.telegram.telegrambots.meta.api.objects.MessageEntity;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
-import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -151,6 +138,305 @@ public class BotService extends TelegramLongPollingBot {
 
                     }
                     break;
+                case BotState.menuPizza:
+                    switch (data) {
+                        case PizzaConstants.meatPizza:
+                            execute(sendServices.deleteMessage(update));
+                            execute(pizzaServices.sendPizzaPage(update, urlMenu + "MeatPizza.jpg"));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.meatPizza, userRepository);
+                            break;
+                        case PizzaConstants.mushroomPizza:
+                            execute(sendServices.deleteMessage(update));
+                            execute(pizzaServices.sendPizzaPage(update, urlMenu + "mushroomPizza.jpg"));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.mushroomPizza, userRepository);
+                            break;
+                        case PizzaConstants.assortiPizza:
+                            execute(sendServices.deleteMessage(update));
+                            execute(pizzaServices.sendPizzaPage(update, urlMenu + "assortiPizza.jpg"));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.assortiPizza, userRepository);
+                            break;
+                        case PizzaConstants.margaritaPizza:
+                            execute(sendServices.deleteMessage(update));
+                            execute(pizzaServices.sendPizzaPage(update, urlMenu + "margoritaPizza.jpg"));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.margarita, userRepository);
+                            break;
+                        case PizzaConstants.kaziPizza:
+                            execute(sendServices.deleteMessage(update));
+                            execute(pizzaServices.sendPizzaPage(update, urlMenu + "qaziliPizza.jpg"));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.kazili, userRepository);
+                            break;
+                        case PizzaConstants.qalampirPizza:
+                            execute(sendServices.deleteMessage(update));
+                            execute(pizzaServices.sendPizzaPage(update, urlMenu + "qalampirliPizza.jpg"));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.qalampirliPizza, userRepository);
+                            break;
+                        case PizzaConstants.paleromPizza:
+                            execute(sendServices.deleteMessage(update));
+                            execute(pizzaServices.sendPizzaPage(update, urlMenu + "paleromPizza.jpg"));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.paleromPizza, userRepository);
+                            break;
+                        case PizzaConstants.exelusivePizza:
+                            execute(sendServices.deleteMessage(update));
+                            execute(pizzaServices.sendPizzaPage(update, urlMenu + "exclusivePizza.jpg"));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.exclusivePizza, userRepository);
+                            break;
+                        case PizzaConstants.mevaliPizza:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.mevaliPizza, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.pideSirliPizza:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.pideSirliPizza, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.pideFarshemPizza:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.pideFarshemPizza, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case MenuConstants.menuBack:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.sendCategory(update));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.start, userRepository);
+                            break;
+                        default:
+                    }
+                    break;
+                case BotState.meatPizza:
+                    switch (data) {
+                        case PizzaConstants.mini:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.meatPizzaMini, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.average:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.meatPizzaAvg, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.big:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.meatPizzaBig, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.huge:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.meatPizzaHuge, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case MenuConstants.menuBack:
+                            execute(sendServices.deleteMessage(update));
+                            execute(pizzaServices.sendPizzaTypes(update, urlMenu + "PizzaMenu.jpg"));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.menuPizza, userRepository);
+                            break;
+                    }
+                    break;
+                case BotState.mushroomPizza:
+                    switch (data) {
+                        case PizzaConstants.mini:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.mushroomPizzaMini, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.average:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.mushroomPizzaAvg, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.big:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.mushroomPizzaBig, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.huge:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.mushroomPizzaHuge, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case MenuConstants.menuBack:
+                            execute(sendServices.deleteMessage(update));
+                            execute(pizzaServices.sendPizzaTypes(update, urlMenu + "PizzaMenu.jpg"));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.menuPizza, userRepository);
+                            break;
+                    }
+                    break;
+                case BotState.assortiPizza:
+                    switch (data) {
+                        case PizzaConstants.mini:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.assortiPizzaMini, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.average:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.assortiPizzaAvg, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.big:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.assortiPizzaBig, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.huge:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.assortiPizzaHuge, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case MenuConstants.menuBack:
+                            execute(sendServices.deleteMessage(update));
+                            execute(pizzaServices.sendPizzaTypes(update, urlMenu + "PizzaMenu.jpg"));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.menuPizza, userRepository);
+                            break;
+                    }
+                    break;
+                case BotState.margarita:
+                    switch (data) {
+                        case PizzaConstants.mini:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.margaritoPizzaMini, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.average:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.margaritoPizzaAvg, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.big:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.margaritoPizzaBig, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.huge:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.margaritoPizzaHuge, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case MenuConstants.menuBack:
+                            execute(sendServices.deleteMessage(update));
+                            execute(pizzaServices.sendPizzaTypes(update, urlMenu + "PizzaMenu.jpg"));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.menuPizza, userRepository);
+                            break;
+                    }
+                    break;
+                case BotState.kazili:
+                    switch (data) {
+                        case PizzaConstants.mini:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.qaziliPizzaMini, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.average:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.qaziliPizzaAvg, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.big:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.qaziliPizzaBig, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.huge:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.qaziliPizzaHuge, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case MenuConstants.menuBack:
+                            execute(sendServices.deleteMessage(update));
+                            execute(pizzaServices.sendPizzaTypes(update, urlMenu + "PizzaMenu.jpg"));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.menuPizza, userRepository);
+                            break;
+                    }
+                    break;
+                case BotState.qalampirliPizza:
+                    switch (data) {
+                        case PizzaConstants.mini:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.pepperoniPizzaMini, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.average:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.pepperoniPizzaAvg, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.big:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.pepperoniPizzaBig, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.huge:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.pepperoniPizzaHuge, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case MenuConstants.menuBack:
+                            execute(sendServices.deleteMessage(update));
+                            execute(pizzaServices.sendPizzaTypes(update, urlMenu + "PizzaMenu.jpg"));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.menuPizza, userRepository);
+                            break;
+                    }
+                    break;
+                case BotState.paleromPizza:
+                    switch (data) {
+                        case PizzaConstants.mini:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.palermoPizzaMini, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.average:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.palermoPizzaAvg, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.big:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.palermoPizzaBig, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.huge:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.palermoPizzaHuge, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case MenuConstants.menuBack:
+                            execute(sendServices.deleteMessage(update));
+                            execute(pizzaServices.sendPizzaTypes(update, urlMenu + "PizzaMenu.jpg"));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.menuPizza, userRepository);
+                            break;
+                    }
+                case BotState.exclusivePizza:
+                    switch (data) {
+                        case PizzaConstants.mini:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.exclusivePizzaMini, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.average:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.exclusivePizzaAvg, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.big:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.exclusivePizzaBig, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case PizzaConstants.huge:
+                            execute(sendServices.deleteMessage(update));
+                            execute(sendServices.orderedProduct(ProductNames.exclusivePizzaHuge, update, productRepository, productPriceRepository));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.ordered, userRepository);
+                            break;
+                        case MenuConstants.menuBack:
+                            execute(sendServices.deleteMessage(update));
+                            execute(pizzaServices.sendPizzaTypes(update, urlMenu + "PizzaMenu.jpg"));
+                            userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.menuPizza, userRepository);
+                            break;
+                    }
+                    break;
+
+
+                /// Lavash Menu
                 case BotState.menuCategory:
                     switch (data) {
                         case LavashConstants.firstNameLavash:
@@ -347,7 +633,7 @@ public class BotService extends TelegramLongPollingBot {
                             execute(sendServices.sendCategory(update));
                             userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.start, userRepository);
                             basketService.cancelOrderFromBasket(update, basketRepository, orderProductRepository);
-                            userService.doEmpityLocation(update,userRepository);
+                            userService.doEmpityLocation(update, userRepository);
                             break;
                         case BasketConstants.cancelOrder:
                             basketService.cancelOrderFromBasket(update, basketRepository, orderProductRepository);

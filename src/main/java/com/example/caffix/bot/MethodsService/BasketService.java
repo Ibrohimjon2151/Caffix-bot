@@ -107,7 +107,7 @@ public class BasketService implements BasketConstants {
         StringBuilder stringBuilder1 = new StringBuilder();
         for (int i = 0; i < allBasket.size(); i++) {
             allPrice += allBasket.get(i).getPrice();
-            stringBuilder1.append((i + 1) + ") " + allBasket.get(i).getAmount() + " ta").append(allBasket.get(i).getName()).append("\n");
+            stringBuilder1.append((i + 1) + ") " + allBasket.get(i).getAmount() + " ta ").append(allBasket.get(i).getName()).append("\n");
         }
         stringBuilder.append("Zakaslar: \n" + stringBuilder1);
         stringBuilder.append("\n ➖➖➖➖ \n");

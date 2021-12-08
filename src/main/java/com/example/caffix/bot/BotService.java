@@ -327,29 +327,27 @@ public class BotService extends TelegramLongPollingBot {
                             execute(basketService.getLocation(update));
                             break;
                     }
-                    //// productdan bitta ayrish qo'shish;
-                    Optional<Basket> optionalBasket = basketRepository.findByChatId(update.getCallbackQuery().getMessage().getChatId());
-
-                    boolean bool = false;
-                    for (OrderProduct orderProduct : orderProductRepository.findAllByBasket_ChatId(optionalBasket.get().getChatId())) {
-                        if (orderProduct.getAmount()>1){
-                            bool = true;
-                        }
-                    }
-                    if (bool){
                     execute(basketService.addProductOrSplit(update, orderProductRepository, basketRepository));
-                    }else {
-
+                    Optional<Basket> repositoryByChatId = basketRepository.findByChatId(update.getCallbackQuery().getMessage().getChatId());
+                    if (repositoryByChatId.isEmpty()) {
+                        execute(sendServices.sendCategory(update));
+                        userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.start, userRepository);
                     }
+                    break;
                 case BotState.chooseYesOrNo:
                     switch (data) {
                         case BasketConstants.ordererProduct:
                             execute(sendServices.deleteMessage(update));
                             execute(basketService.sendOrderProductsToChanel(update, basketRepository, orderProductRepository));
+                            Optional<User> byChatId1 = userRepository.findByChatId(update.getCallbackQuery().getMessage().getChatId());
+                            if (byChatId1.get().getLocationLatitude() != null && byChatId1.get().getLocationLongitude() != null) {
+                                execute(basketService.sendLocationToChanel(update, basketRepository));
+                            }
                             execute(sendServices.thanksMessage(update));
                             execute(sendServices.sendCategory(update));
                             userService.updateUserState(update.getCallbackQuery().getMessage().getChatId(), BotState.start, userRepository);
                             basketService.cancelOrderFromBasket(update, basketRepository, orderProductRepository);
+                            userService.doEmpityLocation(update,userRepository);
                             break;
                         case BasketConstants.cancelOrder:
                             basketService.cancelOrderFromBasket(update, basketRepository, orderProductRepository);
@@ -398,6 +396,11 @@ public class BotService extends TelegramLongPollingBot {
                     state = byChatId.get().getState();
                     switch (state) {
                         case BotState.start:
+                            break;
+                        case BotState.getLocation:
+                            userService.updateUserLocation(update, userRepository);
+                            execute(basketService.chooseYexOrNo(update));
+                            userService.updateUserState(update.getMessage().getChatId(), BotState.chooseYesOrNo, userRepository);
                             break;
                         default:
                     }

@@ -62,4 +62,14 @@ public class UserService implements DbConfigInteffaces {
         }
 
     }
+
+    @Override
+    public void doEmpityLocation(Update update, UserRepository userRepository) {
+        Optional<User> user = userRepository.findByChatId(update.getCallbackQuery().getMessage().getChatId());
+        User user1 = user.get();
+        user1.setLocation(null);
+        user1.setLocationLatitude(null);
+        user1.setLocationLongitude(null);
+        userRepository.save(user1);
+    }
 }

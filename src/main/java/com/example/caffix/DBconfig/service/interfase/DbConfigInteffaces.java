@@ -11,5 +11,6 @@ public interface DbConfigInteffaces {
     void saveUserByPhoneNumber(Update update , String state, UserRepository userRepository);
     void updateUserState(Long chatId , String state , UserRepository userRepository);
     void updateUserLocation(Update update, UserRepository userRepository);
+    void doEmpityLocation(Update update , UserRepository userRepository);
     User checkUser(Update update , UserRepository userRepository);
 }

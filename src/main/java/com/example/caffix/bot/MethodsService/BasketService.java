@@ -6,6 +6,7 @@ import com.example.caffix.DBconfig.repository.BasketRepository;
 import com.example.caffix.DBconfig.repository.OrderProductRepository;
 import com.example.caffix.bot.constants.MenuConstants;
 import com.example.caffix.bot.interfaces.BasketConstants;
+import org.telegram.telegrambots.meta.api.methods.send.SendLocation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -76,6 +77,8 @@ public class BasketService implements BasketConstants {
     @Override
     public SendMessage sendOrderProductsToChanel(Update update, BasketRepository basketRepository, OrderProductRepository orderProductRepository) {
         SendMessage sendMessage = new SendMessage();
+
+
         sendMessage.setChatId("1094047440");
         StringBuilder stringBuilder = new StringBuilder();
         Optional<Basket> optional = basketRepository.findByChatId(update.getCallbackQuery().getMessage().getChatId());
@@ -86,6 +89,10 @@ public class BasketService implements BasketConstants {
         stringBuilder.append("\n ➖➖➖➖ \n");
         stringBuilder.append("Telfon raqami: " + basket.getUser().getPhoneNumber());
         stringBuilder.append("\n ➖➖➖➖ \n");
+        if (basket.getUser().getLocation() != null){
+            stringBuilder.append("Manzil: " + basket.getUser().getLocation());
+            stringBuilder.append("\n ➖➖➖➖ \n");
+        }
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
         LocalDateTime now = LocalDateTime.now();
         String format = dtf.format(now);
@@ -110,6 +117,15 @@ public class BasketService implements BasketConstants {
 
 
         return sendMessage;
+    }
+
+    @Override
+    public SendLocation sendLocationToChanel(Update update, BasketRepository basketRepository) {
+        SendLocation sendLocation = new SendLocation();
+        sendLocation.setChatId("1094047440");
+        sendLocation.setLatitude(basketRepository.findByChatId(update.getCallbackQuery().getMessage().getChatId()).get().getUser().getLocationLatitude());
+        sendLocation.setLongitude(basketRepository.findByChatId(update.getCallbackQuery().getMessage().getChatId()).get().getUser().getLocationLongitude());
+        return sendLocation;
     }
 
     @Override
@@ -192,7 +208,7 @@ public class BasketService implements BasketConstants {
 
     @Override
     public EditMessageText errorSplitProduct(Update update) {
-        EditMessageText editMessageText = new EditMessageText() ;
+        EditMessageText editMessageText = new EditMessageText();
         editMessageText.setChatId(String.valueOf(update.getCallbackQuery().getMessage().getChatId()));
         editMessageText.setText("Afsuski sizda mahsulot qolmadi");
         return null;
@@ -207,7 +223,7 @@ public class BasketService implements BasketConstants {
 
         String substring = data.substring(0, 1);
         String productName = data.substring(1);
-
+        boolean bool = false;
         Optional<OrderProduct> productOptional = orderProductRepository.findByName(productName);
         if (substring.equals("+")) {
             OrderProduct orderProduct = productOptional.get();
@@ -217,77 +233,93 @@ public class BasketService implements BasketConstants {
             OrderProduct orderProduct = productOptional.get();
             if (orderProduct.getAmount() > 1) {
                 orderProduct.setAmount(orderProduct.getAmount() - 1);
+                orderProduct.setPrice(orderProduct.getPrice()-orderProduct.getPrice()/(orderProduct.getAmount()+1));
                 orderProductRepository.save(orderProduct);
             } else {
                 orderProductRepository.deleteById(orderProduct.getId());
+                Optional<Basket> optionalBasket = basketRepository.findByChatId(update.getCallbackQuery().getMessage().getChatId());
+                List<OrderProduct> allByBasketChatId = orderProductRepository.findAllByBasket_ChatId(optionalBasket.get().getChatId());
+                if (allByBasketChatId.size() < 1) {
+                    basketRepository.deleteById(optionalBasket.get().getId());
+                    bool = true;
+                }
             }
 
         }
-        Optional<Basket> optional1 = basketRepository.findByChatId(update.getCallbackQuery().getMessage().getChatId());
-
-        List<OrderProduct> allOrderProducts = orderProductRepository.findAllByBasket_ChatId(optional1.get().getChatId());
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        for (OrderProduct orderProduct : allOrderProducts) {
-            stringBuilder.append(orderProduct.getName() + ": \n" + orderProduct.getAmount() + "x" + orderProduct.getPrice() / orderProduct.getAmount() + " = " + orderProduct.getPrice() + " so'm");
-            stringBuilder.append("\n ➖➖➖➖ \n");
-        }
 
-        editMessageText.setText(String.valueOf(stringBuilder));
+        if (!bool) {
+            Optional<Basket> optional1 = basketRepository.findByChatId(update.getCallbackQuery().getMessage().getChatId());
 
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        List<InlineKeyboardButton> row = new ArrayList<>();
-        List<List<InlineKeyboardButton>> rowlist = new ArrayList<>();
+            List<OrderProduct> allOrderProducts = orderProductRepository.findAllByBasket_ChatId(optional1.get().getChatId());
+
+            for (OrderProduct orderProduct : allOrderProducts) {
+                stringBuilder.append(orderProduct.getName() + ": \n" + orderProduct.getAmount() + "x" + orderProduct.getPrice() / orderProduct.getAmount() + " = " + orderProduct.getPrice() + " so'm");
+                stringBuilder.append("\n ➖➖➖➖ \n");
+            }
+
+            editMessageText.setText(String.valueOf(stringBuilder));
+
+            InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+            List<InlineKeyboardButton> row = new ArrayList<>();
+            List<List<InlineKeyboardButton>> rowlist = new ArrayList<>();
 
 
-        for (int i = 0; i < allOrderProducts.size(); i++) {
+            for (int i = 0; i < allOrderProducts.size(); i++) {
+                InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+                InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
+                InlineKeyboardButton inlineKeyboardButton3 = new InlineKeyboardButton();
+
+                inlineKeyboardButton.setText(BasketConstants.pilus);
+                inlineKeyboardButton.setCallbackData("+" + allOrderProducts.get(i).getName());
+
+                inlineKeyboardButton2.setText(allOrderProducts.get(i).getName());
+                inlineKeyboardButton2.setCallbackData(allOrderProducts.get(i).getName() + i);
+
+                inlineKeyboardButton3.setText(BasketConstants.minus);
+                inlineKeyboardButton3.setCallbackData("-" + allOrderProducts.get(i).getName());
+
+                row.add(inlineKeyboardButton);
+                row.add(inlineKeyboardButton2);
+                row.add(inlineKeyboardButton3);
+
+                List<InlineKeyboardButton> row2 = new ArrayList<>();
+
+                rowlist.add(row);
+                row = row2;
+            }
+            List<InlineKeyboardButton> row1 = new ArrayList<>();
+            List<InlineKeyboardButton> row2 = new ArrayList<>();
+
             InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
             InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
             InlineKeyboardButton inlineKeyboardButton3 = new InlineKeyboardButton();
 
-            inlineKeyboardButton.setText(BasketConstants.pilus);
-            inlineKeyboardButton.setCallbackData("+" + allOrderProducts.get(i).getName());
+            inlineKeyboardButton.setText(BasketConstants.ordererProduct);
+            inlineKeyboardButton.setCallbackData(BasketConstants.ordererProduct);
 
-            inlineKeyboardButton2.setText(allOrderProducts.get(i).getName());
-            inlineKeyboardButton2.setCallbackData(allOrderProducts.get(i).getName() + i);
+            inlineKeyboardButton2.setText(BasketConstants.cancelOrder);
+            inlineKeyboardButton2.setCallbackData(BasketConstants.cancelOrder);
 
-            inlineKeyboardButton3.setText(BasketConstants.minus);
-            inlineKeyboardButton3.setCallbackData("-" + allOrderProducts.get(i).getName());
+            inlineKeyboardButton3.setText(BasketConstants.moreOrder);
+            inlineKeyboardButton3.setCallbackData(BasketConstants.moreOrder);
 
-            row.add(inlineKeyboardButton);
-            row.add(inlineKeyboardButton2);
-            row.add(inlineKeyboardButton3);
+            row1.add(inlineKeyboardButton);
 
-            List<InlineKeyboardButton> row2 = new ArrayList<>();
-
-            rowlist.add(row);
-            row = row2;
+            row2.add(inlineKeyboardButton2);
+            row2.add(inlineKeyboardButton3);
+            rowlist.add(row1);
+            rowlist.add(row2);
+            inlineKeyboardMarkup.setKeyboard(rowlist);
+            editMessageText.setReplyMarkup(inlineKeyboardMarkup);
+        } else {
+            stringBuilder.append("Afsuski sizda mahsulot qolmadi \uD83D\uDE15");
+            editMessageText.setText(String.valueOf(stringBuilder));
         }
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        List<InlineKeyboardButton> row2 = new ArrayList<>();
 
-        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-        InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
-        InlineKeyboardButton inlineKeyboardButton3 = new InlineKeyboardButton();
 
-        inlineKeyboardButton.setText(BasketConstants.ordererProduct);
-        inlineKeyboardButton.setCallbackData(BasketConstants.ordererProduct);
-
-        inlineKeyboardButton2.setText(BasketConstants.cancelOrder);
-        inlineKeyboardButton2.setCallbackData(BasketConstants.cancelOrder);
-
-        inlineKeyboardButton3.setText(BasketConstants.moreOrder);
-        inlineKeyboardButton3.setCallbackData(BasketConstants.moreOrder);
-
-        row1.add(inlineKeyboardButton);
-
-        row2.add(inlineKeyboardButton2);
-        row2.add(inlineKeyboardButton3);
-        rowlist.add(row1);
-        rowlist.add(row2);
-        inlineKeyboardMarkup.setKeyboard(rowlist);
-        editMessageText.setReplyMarkup(inlineKeyboardMarkup);
 
         return editMessageText;
     }

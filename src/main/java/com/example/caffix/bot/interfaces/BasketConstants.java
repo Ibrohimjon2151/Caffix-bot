@@ -2,6 +2,7 @@ package com.example.caffix.bot.interfaces;
 
 import com.example.caffix.DBconfig.repository.BasketRepository;
 import com.example.caffix.DBconfig.repository.OrderProductRepository;
+import org.telegram.telegrambots.meta.api.methods.send.SendLocation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -15,6 +16,7 @@ public interface BasketConstants {
     SendMessage getLocation(Update update);
     EditMessageText errorSplitProduct(Update update);
     SendMessage chooseYexOrNo(Update update);
+    SendLocation sendLocationToChanel(Update update , BasketRepository basketRepository);
 
     String pilus = "➕";
     String minus = "➖";
